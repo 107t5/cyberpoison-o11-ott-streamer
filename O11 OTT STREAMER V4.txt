@@ -1,0 +1,71 @@
+O11 OTT STREAMER V4 is out for tests,
+You can now try (for test) with this commands :
+
+1st create your o11.cfg in local device, in an empty dir and put this. User: admin Pass: admin
+
+{
+    "EpgUrl": "",
+    "Server": "",
+    "Users": [
+        {
+            "Username": "admin",
+            "Password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+            "Network": "",
+            "IsAdmin": true,
+            "HasWebAccess": true,
+            "ProviderIds": []
+        }
+    ],
+    "Servers": null
+}
+If you add scripts you should also add the o11.py and requirements.txt to be installed over run.sh you should adjust the run.sh like with pip3 -r ....
+
+docker run -d \
+  --restart unless-stopped \
+  -e IP_ADDRESS=127.0.0.1 \
+  -p 8484:8484 \
+  -v "$(pwd)/scripts":/home/o11/scripts \
+  -v "$(pwd)/providers":/home/o11/providers \
+  -v "$(pwd)/o11.cfg":/home/o11/o11.cfg \
+  cyberpoison/o11-ott-streamer:v4
+
+Here is the virus total report for the o11v4 binary just in case: https://www.virustotal.com/gui/file/a28cfa3973f57345abfac3d69c28dd06758dee7b72e3580c1455cdef7df28b04⁠
+
+O11 OTT v2
+Notes:
+Beta is a old build, please use latest or nightly, nightly is the most stable release.
+
+O11 is a software with webui that allow you to get working with L3 and other CDM systems.
+
+This software only works on x64_86 architecture.
+
+docker run \
+  --name o11 \
+  --restart always \
+  --detach \
+  --publish 1234:1234 \
+  --volume /mnt/o11-ott:/mnt \
+  cyberpoison/o11-ott-streamer:latest 
+go to http://Machine_IP:1234
+
+The startup_script that run on the machine automatically is :
+
+#!/bin/bash
+
+# Touch the file if it doesn't exist
+if [ ! -f "/mnt/o11.cfg" ]; then
+    touch /mnt/o11.cfg
+fi
+
+# Install dependencies if requirements.txt exists
+if [ -f "/mnt/scripts/requirements.txt" ]; then
+    /usr/bin/pip install -r /mnt/scripts/requirements.txt
+fi
+
+# Create symlink if o11.cfg exists and /home/o11.cfg if doesn't exist
+if [ -f "/mnt/o11.cfg" ] && [ ! -e "/home/o11.cfg" ]; then
+    ln -s /mnt/o11.cfg /home/o11.cfg
+fi
+
+# Run software
+/home/$(Software) --path /mnt/ -noramfs
